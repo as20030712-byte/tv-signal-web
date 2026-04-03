@@ -12,26 +12,21 @@
   <p id="status" style="color:gray;"></p>
 
   <script>
-    const token = "8bb93640-f610-45bb-ba33-ac3bb48f2cba";
-
     async function getSignal() {
       try {
-        const res = await fetch(`https://webhook.site/token/${token}/requests?sorting=newest`);
+        const res = await fetch("/api/signal");
         const data = await res.json();
 
-        if (!data.data || data.data.length === 0) {
-          document.getElementById("status").innerText = "還沒有收到資料";
+        if (!data.signal) {
+          document.getElementById("status").innerText = "還沒有收到訊號";
           return;
         }
 
-        const latest = data.data[0];
-        const content = JSON.parse(latest.content);
-
-        document.getElementById("signal").innerText = content.signal || "沒有 signal";
-        document.getElementById("price").innerText = content.price ? `價格：${content.price}` : "";
+        document.getElementById("signal").innerText = data.signal;
+        document.getElementById("price").innerText = "價格：" + data.price;
         document.getElementById("status").innerText = "已更新";
       } catch (e) {
-        document.getElementById("status").innerText = "讀取失敗，先確認 Webhook.site 的 CORS 有打開";
+        document.getElementById("status").innerText = "讀取失敗";
         console.error(e);
       }
     }
