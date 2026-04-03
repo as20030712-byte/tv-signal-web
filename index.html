@@ -1,13 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>我的交易雷達</title>
+  <title>我的交易訊號</title>
 </head>
+
 <body style="background:black; color:white; text-align:center; margin-top:100px;">
 
   <h1>📈 我的交易訊號</h1>
-  
   <h2 id="signal">等待訊號中...</h2>
+  <h3 id="price"></h3>
+
+  <script>
+    async function getSignal() {
+      try {
+        const res = await fetch("https://webhook.site/token/8bb93640-f610-45bb-ba33-ac3bb48f2cba");
+        const data = await res.json();
+
+        document.getElementById("signal").innerText = data.signal;
+        document.getElementById("price").innerText = "價格：" + data.price;
+
+      } catch (e) {
+        console.log("還沒有資料");
+      }
+    }
+
+    setInterval(getSignal, 3000);
+  </script>
 
 </body>
 </html>
