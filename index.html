@@ -1,15 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>我的交易訊號</title>
 </head>
-<body style="background:black; color:white; text-align:center; margin-top:100px; font-family:sans-serif;">
+<body style="margin:0; background:black; color:white; font-family:Arial, sans-serif; text-align:center;">
 
-  <h1>📈 我的交易訊號</h1>
-  <h2 id="signal">等待訊號中...</h2>
-  <h3 id="price"></h3>
-  <p id="status" style="color:gray;"></p>
+  <div style="margin-top:100px;">
+    <h1 style="font-size:48px; margin-bottom:30px;">📈 我的交易訊號</h1>
+
+    <h2 id="signal" style="font-size:60px; margin:20px 0;">等待訊號中...</h2>
+
+    <h3 id="price" style="font-size:36px; margin:20px 0; color:#ffd966;"></h3>
+
+    <h4 id="time" style="font-size:24px; margin:20px 0; color:#9e9e9e;"></h4>
+
+    <p id="status" style="font-size:20px; color:gray; margin-top:30px;">系統啟動中...</p>
+  </div>
 
   <script>
     async function getSignal() {
@@ -17,14 +25,26 @@
         const res = await fetch("/api/signal");
         const data = await res.json();
 
-        if (!data.signal) {
-          document.getElementById("status").innerText = "還沒有收到訊號";
-          return;
+        const signalEl = document.getElementById("signal");
+        const priceEl = document.getElementById("price");
+        const timeEl = document.getElementById("time");
+        const statusEl = document.getElementById("status");
+
+        signalEl.innerText = data.signal || "等待訊號中...";
+        priceEl.innerText = data.price ? "價格：" + data.price : "";
+        timeEl.innerText = data.time ? "更新時間：" + data.time : "";
+
+        if (data.signal === "BUY") {
+          signalEl.style.color = "lime";
+        } else if (data.signal === "SELL") {
+          signalEl.style.color = "red";
+        } else if (data.signal === "WAITING") {
+          signalEl.style.color = "white";
+        } else {
+          signalEl.style.color = "#00e5ff";
         }
 
-        document.getElementById("signal").innerText = data.signal;
-        document.getElementById("price").innerText = "價格：" + data.price;
-        document.getElementById("status").innerText = "已更新";
+        statusEl.innerText = "已更新";
       } catch (e) {
         document.getElementById("status").innerText = "讀取失敗";
         console.error(e);
