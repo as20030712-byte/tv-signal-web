@@ -1,29 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8" />
   <title>我的交易訊號</title>
 </head>
-
-<body style="background:black; color:white; text-align:center; margin-top:100px;">
+<body style="background:black; color:white; text-align:center; margin-top:100px; font-family:sans-serif;">
 
   <h1>📈 我的交易訊號</h1>
   <h2 id="signal">等待訊號中...</h2>
   <h3 id="price"></h3>
+  <p id="status" style="color:gray;"></p>
 
   <script>
+    const token = "8bb93640-f610-45bb-ba33-ac3bb48f2cba";
+
     async function getSignal() {
       try {
-        const res = await fetch("https://webhook.site/token/8bb93640-f610-45bb-ba33-ac3bb48f2cba");
+        const res = await fetch(`https://webhook.site/token/${token}/requests?sorting=newest`);
         const data = await res.json();
 
-        document.getElementById("signal").innerText = data.signal;
-        document.getElementById("price").innerText = "價格：" + data.price;
+        if (!data.data || data.data.length === 0) {
+          document.getElementById("status").innerText = "還沒有收到資料";
+          return;
+        }
 
+        const latest = data.data[0];
+        const content = JSON.parse(latest.content);
+
+        document.getElementById("signal").innerText = content.signal || "沒有 signal";
+        document.getElementById("price").innerText = content.price ? `價格：${content.price}` : "";
+        document.getElementById("status").innerText = "已更新";
       } catch (e) {
-        console.log("還沒有資料");
+        document.getElementById("status").innerText = "讀取失敗，先確認 Webhook.site 的 CORS 有打開";
+        console.error(e);
       }
     }
 
+    getSignal();
     setInterval(getSignal, 3000);
   </script>
 
