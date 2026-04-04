@@ -1,52 +1,120 @@
-<script>
-async function fetchSignal() {
-    try {
-        const res = await fetch('/api/signal');
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的交易訊號</title>
+  <style>
+    body {
+      background: #000;
+      color: #fff;
+      text-align: center;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding-top: 100px;
+    }
+
+    h1 {
+      font-size: 56px;
+      margin-bottom: 30px;
+    }
+
+    .signal {
+      font-size: 64px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+
+    .buy { color: #00ff88; }
+    .sell { color: #ff4d4d; }
+    .exit { color: #ffd700; }
+
+    #star {
+      font-size: 32px;
+      margin: 10px 0 20px 0;
+      color: #00d4ff;
+    }
+
+    #price {
+      font-size: 28px;
+      color: #ffd966;
+      margin: 10px 0;
+    }
+
+    #time {
+      font-size: 22px;
+      color: #cfcfcf;
+      margin: 10px 0;
+    }
+
+    #status {
+      font-size: 18px;
+      color: gray;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>📈 我的交易訊號</h1>
+
+  <div id="signal" class="signal">等待訊號中...</div>
+  <div id="star"></div>
+  <div id="price"></div>
+  <div id="time"></div>
+  <div id="status">系統啟動中...</div>
+
+  <script>
+    const API_URL = "https://tv-signal-web.vercel.app/api/signal";
+
+    async function fetchSignal() {
+      try {
+        const res = await fetch(API_URL + "?t=" + Date.now());
         const data = await res.json();
 
         const signalEl = document.getElementById("signal");
+        const starEl = document.getElementById("star");
         const priceEl = document.getElementById("price");
         const timeEl = document.getElementById("time");
-        const starEl = document.getElementById("star");
+        const statusEl = document.getElementById("status");
 
-        if (!data || !data.signal) return;
+        if (!data || !data.signal) {
+          statusEl.innerText = "還沒有收到訊號";
+          return;
+        }
 
-        // 訊號
-        signalEl.innerText = data.signal;
-
-        // 顏色
         if (data.signal === "BUY") {
-            signalEl.style.color = "#00ff88";
+          signalEl.innerText = "BUY";
+          signalEl.className = "signal buy";
         } else if (data.signal === "SELL") {
-            signalEl.style.color = "#ff4d4d";
+          signalEl.innerText = "SELL";
+          signalEl.className = "signal sell";
+        } else if (data.signal === "EXIT") {
+          signalEl.innerText = data.side === "LONG" ? "EXIT LONG" : "EXIT SHORT";
+          signalEl.className = "signal exit";
         } else {
-            signalEl.style.color = "#ffaa00";
+          signalEl.innerText = data.signal;
+          signalEl.className = "signal";
         }
 
-        // 價格
-        priceEl.innerText = "價格：" + (data.price || "--");
-
-        // ⭐ 星星（重點在這）
         if (data.star) {
-            let stars = "";
-            for (let i = 0; i < Number(data.star); i++) {
-                stars += "⭐";
-            }
-            starEl.innerText = stars;
+          starEl.innerText = "★".repeat(Number(data.star));
         } else {
-            starEl.innerText = "";
+          starEl.innerText = "";
         }
 
-        // 時間
-        const now = new Date();
-        timeEl.innerText = "更新時間：" + now.toLocaleString();
-
-    } catch (err) {
-        console.log("error:", err);
+        priceEl.innerText = "價格： " + (data.price || "--");
+        timeEl.innerText = "更新時間： " + new Date().toLocaleString("zh-TW");
+        statusEl.innerText = "已更新";
+      } catch (err) {
+        console.error(err);
+        document.getElementById("status").innerText = "讀取失敗";
+      }
     }
-}
 
-// 每2秒抓一次
-setInterval(fetchSignal, 2000);
-fetchSignal();
-</script>
+    fetchSignal();
+    setInterval(fetchSignal, 2000);
+  </script>
+
+</body>
+</html>
